@@ -1,25 +1,70 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
+
+import './index.css'
+
+import InputTarea from './components/InputTarea'
+import ListaTareas from './components/ListaTareas'
 
 function App() {
-  const [tareas, setTareas] = useState([])
+  // Cargar tareas desde localStorage al iniciar la aplicación
+  const [tareas, setTareas] = useState(()=> {
+    const tareasGuardadas = localStorage.getItem("tareas")
+    return tareasGuardadas ? JSON.parse(tareasGuardadas) : []
+  })
+
   const [nuevaTarea, setNuevaTarea] = useState("")
 
+  // Guardar tareas en localStorage cada vez que cambien
+  useEffect(() => {
+    localStorage.setItem("tareas", JSON.stringify(tareas))
+  }, [tareas])
+
   const agregarTarea = () => {
-    setTareas([...tareas, nuevaTarea])
+    const nueva = {
+      texto: nuevaTarea,
+      completada: false
+    }
+
+    setTareas([...tareas, nueva])
     setNuevaTarea("")
   }
 
+  const eliminarTarea = (indexAEliminar) => {
+    const nuevasTareas = tareas.filter((_, index) => index !== indexAEliminar)
+    setTareas(nuevasTareas)
+  }
+
+  const toggleCompletada = (index) => {
+    const nuevasTareas = tareas.map((tarea, i) => {
+      if (i === index) {
+        return {
+          ...tarea,
+          completada: !tarea.completada
+        }
+      }
+      return tarea
+    })
+
+    setTareas(nuevasTareas)
+  }
+
   return (
-    <div>
-      <h1>Mi app de tareas</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
+      <h1 className="text-3xl font-bold mb-6">Mi app de tareas</h1>
 
-      <input 
-        value={nuevaTarea}
-        onChange={(e) => setNuevaTarea(e.target.value)}
-        placeholder="Escribe una nueva tarea"
-       />
+      <div className='bg-white p-4 rounded-xl shadow w-full max-w-md'>
+        <InputTarea
+          nuevaTarea={nuevaTarea}
+          setNuevaTarea={setNuevaTarea}
+          agregarTarea={agregarTarea}
+        />
 
-      <button onClick={agregarTarea}>Agregar tarea</button>
+        <ListaTareas
+          tareas={tareas}
+          toggleCompletada={toggleCompletada}
+          eliminarTarea={eliminarTarea}
+        />
+      </div>
     </div>
   )
 }
