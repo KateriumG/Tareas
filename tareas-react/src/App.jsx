@@ -4,6 +4,7 @@ import './index.css'
 
 import InputTarea from './components/InputTarea'
 import ListaTareas from './components/ListaTareas'
+import Header from './components/Header'
 
 function App() {
   // Cargar tareas desde localStorage al iniciar la aplicación
@@ -14,10 +15,26 @@ function App() {
 
   const [nuevaTarea, setNuevaTarea] = useState("")
 
+  // Estado para el modo oscuro con persistencia
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem("darkMode")
+    return savedMode ? JSON.parse(savedMode) : false
+  })
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+    }
+    localStorage.setItem("darkMode", JSON.stringify(darkMode))
+  }, [darkMode])
+
   // Guardar tareas en localStorage cada vez que cambien
   useEffect(() => {
     localStorage.setItem("tareas", JSON.stringify(tareas))
   }, [tareas])
+
 
   const agregarTarea = () => {
     const nueva = {
@@ -49,10 +66,10 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold mb-6">Mi app de tareas</h1>
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center p-6`}>
+      <Header darkMode={darkMode} setDarkMode={setDarkMode} />
 
-      <div className='bg-white p-4 rounded-xl shadow w-full max-w-md'>
+      <div className={`bg-white dark:bg-gray-800 p-4 rounded-xl shadow w-full max-w-md`}>
         <InputTarea
           nuevaTarea={nuevaTarea}
           setNuevaTarea={setNuevaTarea}
